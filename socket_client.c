@@ -31,26 +31,12 @@ uint8_t ESP8266_SendCmd(uint8_t* cmd)
 	}
 }
 
-void ESP_ServerStart()
-{
-	while(1)
-	{
-		
-		(ESP_USART_LOWLEVEL_Recv(resp, idx) != 1)?(idx = (idx + 1) % MAX_RESP_BUFFER_SIZE):(idx);		
-		if(strstr((const char*)resp, "CONNECT"))
-		{
-			return;
-		}
-	}
-}
 void ESP8266_RespBufferReset(void)
 {
-	//watch resp
 	memset(resp, NULL, MAX_RESP_BUFFER_SIZE);//debug here
 	idx = 0;
 }
 
-//TEST
 uint8_t state = 0;
 void SystemClock_Config(void);
 
@@ -64,44 +50,28 @@ int main()
 	ESP8266_RespBufferReset();
 	ESP8266_SendCmd((uint8_t*)"ATE0\r\n");
 	ESP8266_RespBufferReset();
-	//ESP8266_SendCmd((uint8_t*)"AT+RST\r\n");
-	//ESP8266_RespBufferReset();	
-	//ESP8266_SendCmd((uint8_t*)"AT+RESTORE\r\n");
-	//ESP8266_RespBufferReset();
 	LL_mDelay(1000); //Prevent ESP8266 flooding message
 	ESP8266_SendCmd((uint8_t*)"AT+CWMODE=1\r\n");
 	ESP8266_RespBufferReset();
-	//ESP8266_SendCmd((uint8_t*)"AT+RST\r\n");
-	//ESP8266_RespBufferReset();	
 	LL_mDelay(1000);
 	ESP8266_SendCmd((uint8_t*)"AT+CWJAP=\"TNI_CERT_LAB\",\"tnieng406\"\r\n");
 	ESP8266_RespBufferReset();	
 	ESP8266_SendCmd((uint8_t*)"AT+CWJAP?\r\n");
 	ESP8266_RespBufferReset();	
-	//LL_mDelay(1000);
-	
-/*----------------CLIENT------------------------------------------------------*/
 	ESP8266_SendCmd((uint8_t*)"AT+CIPMUX=0\r\n");
 	ESP8266_RespBufferReset();
-	ESP8266_SendCmd((uint8_t*)"AT+CIPSTART=\"TCP\",\"169.254.148.106\",1102\r\n");
+	ESP8266_SendCmd((uint8_t*)"AT+CIPSTART=\"TCP\",\"192.168.1.161\",1102\r\n");
 	ESP8266_RespBufferReset();
-	
-	ESP8266_SendCmd((uint8_t*)"AT+CIPSEND=6\r\n");
+	ESP8266_SendCmd((uint8_t*)"AT+CIPSEND=1\r\n");
 	ESP8266_RespBufferReset();
-	
-	ESP_USART_LOWLEVEL_Transmit((uint8_t *)"1");
 	
 	while(1)
 	{
-		//Determine what to do with server by using 2 following function
-		//use (ESP_USART_LOWLEVEL_Recv(resp, idx) != 1)?(idx = (idx + 1) % MAX_RESP_BUFFER_SIZE):(idx);	 to pop out response from esp8266 and store in 'resp' data
-		//use ESP8266_RespBufferReset() to clear response buffer after dealing with current command
-		//use strstr function to find substring in 'resp'
-		(ESP_USART_LOWLEVEL_Recv(resp, idx) != 1)?(idx = (idx + 1) % MAX_RESP_BUFFER_SIZE):(idx);	
 		
+		(ESP_USART_LOWLEVEL_Recv(resp, idx) != 1)?(idx = (idx + 1) % MAX_RESP_BUFFER_SIZE):(idx);
+		ESP_USART_LOWLEVEL_Transmit((uint8_t *)"1");
 	}
 }
-
 
 void SystemClock_Config(void)
 {
